@@ -1,0 +1,10 @@
+"hold shooting button" - time one needs to hold the shooting button in order to shoot. [seconds]
+"number of teeth" - number of teeth inside the stepper motor. This determines the amount of steps a stepper motor can do
+"number of teeth stepper" - number of teeth on a gear mounted on stepper 
+"number of teeth turret" - number of teeth on a gear that rotates turret
+"initial velocity" - initial velocity of a projectile. [m/s]
+"x0" - position of a shooting point [m]
+"y0" - hight of a shooting point relative to the groud [m]
+"dx" - horizontal distance between stepper axis and canon axis. [mm]
+"dy" - horizontal distance between stepper axis and canon axis. [mm]
+"r" - radius of a disk that is connected to the canon
