@@ -65,8 +65,8 @@ def get_average_coordinates_from_array_of_images(array, target=None):
 
 
 if __name__ == '__main__':
-    img = cv.imread('crap0.jpg')
-    print(img.size)
+    img = cv.imread('3.jpg')
+    print(img.shape)
 
     # img = rescale(img, 1)
 
@@ -75,11 +75,12 @@ if __name__ == '__main__':
     qr = list(get_qrcode_pyzbar(img))
     if qr:
         for points, string in qr:
-            # print(points)
+            print(points)
             cv.circle(img, tuple(points[0]), 5, (255, 0, 0), -1)
             cv.circle(img, tuple(points[1]), 5, (0, 0, 255), -1)
             cv.circle(img, tuple(points[2]), 5, (0, 255, 255), -1)
             middle = find_middle(points, give_int=True)
+            print(middle)
             img = cv.polylines(img, [points], 1, (0, 255, 0), 2)
             cv.circle(img, middle, 2, (0, 0, 255), -1)
             cv.circle(img, (320, 240), 3, (255, 0, 0), -1)

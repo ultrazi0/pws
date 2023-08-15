@@ -60,7 +60,7 @@ def process_show(resol, event_closed):
             img = np.ndarray(shape=(resol[1], resol[0], image_channels), buffer=mem.buf, dtype=np.uint8)
 
             # Show image
-            cv2.circle(img, (320, 240), 3, (255, 0, 0), -1)
+            cv2.circle(img, (img.shape[1]//2, img.shape[0]//2), 3, (255, 0, 0), -1)
             cv2.imshow('Camera', img)
             k = cv2.waitKey(1)
 

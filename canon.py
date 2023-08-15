@@ -56,7 +56,7 @@ class Canon:
 
 if __name__ == "__main__":
     GPIO.setmode(GPIO.BOARD)
-    canon = Canon(3, 5, 7, 36)
+    canon = Canon(5, 3, 7, 36)
     print('Prepairing...')
     sleep(1)
     canon.shoot()

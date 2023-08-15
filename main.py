@@ -26,21 +26,21 @@ def start_aiming(image=None, images_array=None):
     #cv2.imwrite('crap0.jpg', image)
     if image is not None:
         # Rotate the image, because the camera actually sees an inverted image
-        image = cv2.rotate(image, cv2.ROTATE_180)
+        image = cv2.flip(image, 0)
         
         qr = list(get_qrcode_pyzbar(image))
         coords = qr[0][0] if qr else np.array([]) # Get the coordinates
     
     if images_array is not None:
         # Rotate all images 180 degrees
-        images_array = np.array([cv2.rotate(img, cv2.ROTATE_180) for img in images_array], dtype=np.uint8)
+        images_array = np.array([cv2.flip(img, 0) for img in images_array], dtype=np.uint8)
 
         # Get the coordinates
         coords = get_average_coordinates_from_array_of_images(images_array)
 
     if coords.size:
         # Translate the "image" coordinates to "real" coordinates (with center of the camera as origint)
-        real_points = [translate_image_point(point) for point in coords]
+        real_points = [translate_image_point(point, current_resolution=image_resol) for point in coords]
 
         # Draw borders around the QR-code and show the frame in separate window
         # middle = find_middle(coords, give_int=True)
@@ -86,7 +86,7 @@ def start_aiming(image=None, images_array=None):
         print('y-angle:', angle_y)
         
         # Aim
-        aim((angle_x, angle_y), stepper, servo, config, delay=1)
+        aim((-angle_x, angle_y), stepper, servo, config, delay=1)
     else:
         print('Nothing, Sir!')
     
@@ -111,15 +111,15 @@ if __name__ == '__main__':
     g = 9.8122
 
     # Camera-related constants
-    coordinates_of_camera_with_respect_to_the_turret = (0.115, -0.035, 0.03)  # Center of the turret, needed for correct horizontal angle
-    coordinates_of_camera_with_respect_to_the_canon = (0.01, -0.125, -0.045)  # Canon itself, needed for correct vertical angle
+    coordinates_of_camera_with_respect_to_the_turret = (0.03, -0.035, 0.03)  # Center of the turret, needed for correct horizontal angle
+    coordinates_of_camera_with_respect_to_the_canon = (0.03, -0.125, 0.05)  # Canon itself, needed for correct vertical angle
 
     focus_length = 3.04*10**(-3)
     qr_width = 0.122
     image_resol = (640, 480)
 
     # Initialize camera-related objects
-    img_mem = SharedMemory(name='ImageMemory', create=True, size=2**20)  # Used to share images between processes
+    img_mem = SharedMemory(name='ImageMemory', create=True, size=2**22)  # Used to share images between processes
     closed = Event()  # Needed to indicate that processes should close 
 
     # Process that captures and sends images

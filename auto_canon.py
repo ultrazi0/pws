@@ -15,24 +15,26 @@ def start_aiming(image, detect):
     cv2.imwrite('crap0.jpg', image)
 
     # Rotate the image, because the camera actually sees an inverted image
-    image = cv2.rotate(image, cv2.ROTATE_180)
+    image = cv2.flip(image, 0)
+    print(image.size)
 
     qr = list(get_qrcode_pyzbar(image))
     if qr:
         coords = qr[0][0]  # Get the coordinates
 
         # Translate the "image" coordinates to "real" coordinates (with center of the camera as origint)
-        real_points = [translate_image_point(point) for point in coords]
+        real_points = [translate_image_point(point, current_resolution=(image.shape[1], image.shape[0])) for point in coords]
+        print(real_points)
 
         # Draw borders around the QR-code and show the frame in separate window
         middle = find_middle(coords, give_int=True)
         print(middle, 'ff')
         image = cv2.polylines(image, [coords], 1, (0, 255, 0), 2)
         cv2.circle(image, middle, 2, (0, 0, 255), -1)
-        cv2.circle(image, (320, 240), 3, (255, 0, 0), -1)
+        cv2.circle(image, (image.shape[1]//2, image.shape[0]//2), 3, (255, 0, 0), -1)
         
         # Show the image with the target
-        cv2.imshow('Target', cv2.rotate(image, cv2.ROTATE_180))
+        cv2.imshow('Target', cv2.flip(image, 0))
         cv2.circle(image, tuple(coords[0]), 5, (255, 0, 0), -1)
         cv2.circle(image, tuple(coords[1]), 5, (0, 0, 255), -1)
         cv2.circle(image, tuple(coords[2]), 5, (0, 255, 255), -1)
@@ -42,6 +44,7 @@ def start_aiming(image, detect):
 
         # Calculate the distance from camera
         d_camera, M_coords = distance(real_points, focus=focus_length, qrcode_length=qr_width, image_size=image_size, return_middle=True)
+        print('M:', M_coords)
 
         # Print it out
         print('Distance camera:', d_camera)
@@ -92,7 +95,7 @@ if __name__ == '__main__':
     g = 9.8122
 
     # Camera-related constants
-    coordinates_of_camera_with_respect_to_the_turret = (0.03, -0.03, 0.03)  # Center of the turret, needed for correct horizontal angle
+    coordinates_of_camera_with_respect_to_the_turret = (0.115, -0.03, 0.03)  # Center of the turret, needed for correct horizontal angle
     coordinates_of_camera_with_respect_to_the_canon = (0.03, -0.11, 0.045)  # Canon itself, needed for correct vertical angle
 
     focus_length = 3.04*10**(-3)
@@ -120,7 +123,7 @@ if __name__ == '__main__':
         initial_step=initial_step, upper_border=120, lower_border=-120, config=config, config_file=config_file)
     
     # Initialize canon
-    canon = Canon(3, 5, 7, 36, config)
+    canon = Canon(5, 3, 7, 36, config)
 
     # Main loop    
     try:
@@ -130,7 +133,7 @@ if __name__ == '__main__':
                 print("Failed to get a frame...")
                 break
 
-            img = cv2.rotate(img, cv2.ROTATE_180)  # VERTICALLY MIRRORS THE IMAGE \\ (UN)COMMENT IF NEEDED
+            #img = cv2.rotate(img, cv2.ROTATE_180)  # VERTICALLY MIRRORS THE IMAGE \\ (UN)COMMENT IF NEEDED
             
             cv2.imshow('Camera', img)
 

@@ -400,17 +400,14 @@ def angle_with_cosine_theorem(a, b, c):
 def c_with_cosine_theorem(a, b, angle):
     return sqrt(a**2+b**2-2*a*b*cos(angle))
 
-def translate_origin_to_canon(d, M_coords, O_coords, focus_length=(3.04*10**(-3)), 
-                              current_resolution=(640, 480), sensor_image_area=(3.68*10**(-3), 2.76*10**(-3))) -> tuple:
+def translate_origin_to_canon(d, M_coords, O_coords, focus_length=(3.04*10**(-3))) -> tuple:
     """
     Gives data needed to aim the canon itself: both parts of the angle and the distance from the canon
 
     :param d: distance from the camera (IN METERS)
     :param M_coords: coordinates of middle of the image (IN METERS)
     :param O_coords: coordinates of the camera when the canon is the origin (IN METERS)
-    :param focus: focal length of the camera (IN METERS)
-    :param current_resolution: camera resolution used right now (tuple or list)
-    :param sensor_image_area: length and width of the camera's sensor (tuple or list) \ (IN METERS)
+    :param focus_length: focal length of the camera (IN METERS)
     :return: tuple: (x-angle, y-angle, distance from canon)
     """
     O = O_coords  # Coordinates of the camera
@@ -485,7 +482,7 @@ def translate_image_point(point_image, focus_legth=(3.04*10**(-3)), current_reso
     """
 
     # Coordinates of the point (here point P) if the middel of the image were the origin \ IN PIXELS
-    x_P_px = -current_resolution[0]//2 + point_image[0]
+    x_P_px = current_resolution[0]//2 - point_image[0]
     y_P_px = -point_image[1] + current_resolution[1]//2
 
     # What part of the sensor does it "cover"
@@ -571,13 +568,13 @@ if __name__ == '__main__':
     config_file = 'cfg.ini'
     config.read(config_file)
 
-    d = 8.05381
-    O_coords = (2, -2, 5)
+    d = 0.6
+    O_coords = (0.03, -0.11, 0.04)
     M_coords = (
-        2.59579,
-        -4,
-        5.27613
+        0.0002825,
+        -0.00304,
+        -0.000563
     )
 
 
-    print(translate_origin_to_canon(d, M_coords, O_coords, focus_length=2))
+    print(translate_origin_to_canon(d, M_coords, O_coords, focus_length=3.04*10**(-3)))
