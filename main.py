@@ -86,7 +86,7 @@ def start_aiming(image=None, images_array=None):
         print('y-angle:', angle_y)
         
         # Aim
-        aim((-angle_x, angle_y), stepper, servo, config, delay=1)
+        aim((angle_x, angle_y), stepper, servo, config, delay=1)
     else:
         print('Nothing, Sir!')
     
