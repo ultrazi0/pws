@@ -36,11 +36,18 @@ def angle_canon(canon_angle, dx, dy, r, give_degrees=True, **kwargs):
     ab = kwargs['ab'] if 'ab' in kwargs else sqrt(dx**2 + dy**2)
     phi = kwargs['phi'] if 'phi' in kwargs else atan(dy/dx)
     
-    theta = asin(sin(canon_angle-phi)*ab/r)
+    max_angle_beta = asin(r/ab) + phi
+    if canon_angle > max_angle_beta:
+        print('Sorry, Sir! The turret cannot go that high.\n' +
+              '    We will still lift it as high as possible though')
+        angle_alpha = pi + phi + asin(dy/r) - acos(r/ab)
+    else:
+        theta = asin(sin(canon_angle-phi)*ab/r)
+        angle_alpha = theta + canon_angle + asin(dy/r)
 
     if give_degrees:
-        return degrees(theta + canon_angle + asin(dy/r))
-    return theta + canon_angle + asin(dy/r)
+        return degrees(angle_alpha)
+    return angle_alpha
 
 
 def calculate_angle_without_drag(x, y, v0, x0=0, y0=0, g=9.81, give_degrees=True, return_both=False):

@@ -1,4 +1,4 @@
-from math import atan, degrees
+from math import atan, degrees, asin
 from time import sleep
 from math_part import find_middle, angle_turret, angle_canon
 from distance_qr import distance
@@ -37,13 +37,6 @@ def aim(angles, stepper, servo, config, delay=None):
     dy = float(config['constants']['dy'])
     r = float(config['constants']['r'])
 
-    # FIXME: calculate max angle
-    max_angle_y = 14.8
-    if angle_y > max_angle_y:
-        print('Sorry, Sir! The turret cannot go that high.\n' +
-                '    Yet we will still lift it as high as possible')
-        angle_y = max_angle_y
-
     turn_angle_y = angle_canon(angle_y, dx=dx, dy=dy, r=r, give_degrees=True)  # Calculate the turn angle
     servo.rotate_to(turn_angle_y)  # Rotate
 
@@ -81,7 +74,7 @@ if __name__ == "__main__":
         while 1:
             angle = float(input('Enter angle: '))
 
-            aim((angle, 0), stepper, servo, config)
+            aim((0, angle), stepper, servo, config)
     except KeyboardInterrupt:
         print("Closed via Ctrl + C")
     finally:
