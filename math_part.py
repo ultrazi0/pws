@@ -478,12 +478,11 @@ def translate_origin_to_canon(d, M_coords, O_coords, focus_length=(3.04*10**(-3)
 
 
 # Translate coordinates of the image
-def translate_image_point(point_image, focus_legth=(3.04*10**(-3)), current_resolution=(640, 480), sensor_size=(3.68*10**(-3), 2.76*10**(-3))):
+def translate_image_point(point_image, current_resolution=(640, 480), sensor_size=(3.68*10**(-3), 2.76*10**(-3))):
     """
     Translates the coordinates of a point in image to "real" coordinates
 
     :param point_image: two coordinates of a point
-    :param focus_length: focus length of the camera
     :param current_resolution: resolution in which image has been taken
     :param sensor_size: length and width of the sensor of the camera
     """

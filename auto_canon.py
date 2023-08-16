@@ -22,7 +22,7 @@ def start_aiming(image, detect):
     if qr:
         coords = qr[0][0]  # Get the coordinates
 
-        # Translate the "image" coordinates to "real" coordinates (with center of the camera as origint)
+        # Translate the "image" coordinates to "real" coordinates (with center of the camera as origin)
         real_points = [translate_image_point(point, current_resolution=(image.shape[1], image.shape[0])) for point in coords]
         print(real_points)
 
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     g = 9.8122
 
     # Camera-related constants
-    coordinates_of_camera_with_respect_to_the_turret = (0.115, -0.03, 0.03)  # Center of the turret, needed for correct horizontal angle
+    coordinates_of_camera_with_respect_to_the_turret = (0.03, -0.03, 0.03)  # Center of the turret, needed for correct horizontal angle
     coordinates_of_camera_with_respect_to_the_canon = (0.03, -0.11, 0.045)  # Canon itself, needed for correct vertical angle
 
     focus_length = 3.04*10**(-3)
@@ -133,7 +133,7 @@ if __name__ == '__main__':
                 print("Failed to get a frame...")
                 break
 
-            #img = cv2.rotate(img, cv2.ROTATE_180)  # VERTICALLY MIRRORS THE IMAGE \\ (UN)COMMENT IF NEEDED
+            #img = cv2.rotate(img, cv2.ROTATE_180)  # ROTATES THE IMAGE \\ (UN)COMMENT IF NEEDED
             
             cv2.imshow('Camera', img)
 
