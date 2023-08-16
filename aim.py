@@ -74,7 +74,7 @@ if __name__ == "__main__":
         while 1:
             angle = float(input('Enter angle: '))
 
-            aim((0, angle), stepper, servo, config)
+            aim((angle, 0), stepper, servo, config)
     except KeyboardInterrupt:
         print("Closed via Ctrl + C")
     finally:

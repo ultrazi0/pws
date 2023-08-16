@@ -583,4 +583,5 @@ if __name__ == '__main__':
     )
 
 
+    print(translate_image_point((188,100), (454, 270)))
     print(translate_origin_to_canon(d, M_coords, O_coords, focus_length=3.04*10**(-3)))

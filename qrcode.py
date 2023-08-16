@@ -65,7 +65,7 @@ def get_average_coordinates_from_array_of_images(array, target=None):
 
 
 if __name__ == '__main__':
-    img = cv.imread('3.jpg')
+    img = cv.imread('Camera Calibration/caliResult1.png')
     print(img.shape)
 
     # img = rescale(img, 1)
@@ -83,7 +83,7 @@ if __name__ == '__main__':
             print(middle)
             img = cv.polylines(img, [points], 1, (0, 255, 0), 2)
             cv.circle(img, middle, 2, (0, 0, 255), -1)
-            cv.circle(img, (320, 240), 3, (255, 0, 0), -1)
+            cv.circle(img, (img.shape[1]//2, img.shape[0]//2), 3, (255, 0, 0), -1)
 
     else:
         print("Alas")
