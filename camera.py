@@ -43,6 +43,7 @@ def process_capture(resol, event_closed):
         print('Capture: Closing', flush=True)
     finally:
         mem.close()
+        cap.close()
         print('Sender: Done', flush=True)
 
 
@@ -121,24 +122,24 @@ if __name__ == "__main__":
     try:
         capture.start()
         show.start()
-        sleep(5)
+        # sleep(5)
 
-        images = read_image_from_shared_memory(camera_resol, 5)
+        # images = read_image_from_shared_memory(camera_resol, 5)
 
-        for i, img in enumerate(images):
-            print('------'+str(i)+'------')
-            print(img)
-            qr = list(get_qrcode_pyzbar(img))
-            if qr:
-                for points, message in qr:
-                    middle = find_middle(points, give_int=True)
-                    cv2.polylines(img, [points], 1, (0, 255, 0), 2)       
-                    cv2.circle(img, middle, 4, (0, 0, 255), -1)
+        # for i, img in enumerate(images):
+        #     print('------'+str(i)+'------')
+        #     print(img)
+        #     qr = list(get_qrcode_pyzbar(img))
+        #     if qr:
+        #         for points, message in qr:
+        #             middle = find_middle(points, give_int=True)
+        #             cv2.polylines(img, [points], 1, (0, 255, 0), 2)       
+        #             cv2.circle(img, middle, 4, (0, 0, 255), -1)
     
-            cv2.imshow(str(i), img)
-        while 1:
-            if cv2.waitKey(1) % 0xFF == ord("q"):
-                break
+        #     cv2.imshow(str(i), img)
+        # while 1:
+        #     if cv2.waitKey(1) % 0xFF == ord("q"):
+        #         break
 
         capture.join()
         show.join()

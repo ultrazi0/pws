@@ -9,10 +9,12 @@ from qrcode import get_qrcode_pyzbar
 from math_part import find_middle, translate_origin_to_canon, translate_image_point, sin, cos, find_angle_with_drag, radians, pi, atan, degrees
 from distance_qr import distance
 from time import sleep
+from CameraCalibration.undistort import *
 
 
 def start_aiming(image, detect):
     cv2.imwrite('crap0.jpg', image)
+    image = undistort(image, cmx, dist)
 
     # Rotate the image, because the camera actually sees an inverted image
     image = cv2.flip(image, 0)
@@ -96,7 +98,7 @@ if __name__ == '__main__':
 
     # Camera-related constants
     coordinates_of_camera_with_respect_to_the_turret = (0.03, -0.03, 0.03)  # Center of the turret, needed for correct horizontal angle
-    coordinates_of_camera_with_respect_to_the_canon = (0.03, -0.11, 0.045)  # Canon itself, needed for correct vertical angle
+    coordinates_of_camera_with_respect_to_the_canon = (0.045, -0.09, 0.033)  # Canon itself, needed for correct vertical angle
 
     focus_length = 3.04*10**(-3)
     qr_width = 0.122
@@ -125,7 +127,8 @@ if __name__ == '__main__':
     # Initialize canon
     canon = Canon(5, 3, 7, 36, config)
 
-    # Main loop    
+    # Main loop
+    cmx, dist = get_calib_params('CameraCalibration/calibration.pkl')
     try:
         while 1:
             success, img = cap.read()  # Read frame
