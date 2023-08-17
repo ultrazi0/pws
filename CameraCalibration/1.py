@@ -12,7 +12,7 @@ print(cmx)
 print()
 print(dist)
 
-img = cv.imread('images/crap1.jpg')
+img = cv.imread('images/crap3.jpg')
 h, w = img.shape[:2]
 newCameraMatrix, roi = cv.getOptimalNewCameraMatrix(cmx, dist, (w,h), 1, (w,h))
 

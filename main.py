@@ -18,6 +18,7 @@ from qrcode import get_qrcode_pyzbar, get_average_coordinates_from_array_of_imag
 from distance_qr import distance
 from multiprocessing import Process, Event
 from multiprocessing.shared_memory import SharedMemory
+from CameraCalibration.undistort import undistort, get_calib_params
 
 
 def start_aiming(image=None, images_array=None):
@@ -25,6 +26,9 @@ def start_aiming(image=None, images_array=None):
 
     #cv2.imwrite('crap0.jpg', image)
     if image is not None:
+        image = undistort(image, cmx, dist)
+        h, w = image.shape[:2]
+
         # Rotate the image, because the camera actually sees an inverted image
         image = cv2.flip(image, 0)
         
@@ -33,14 +37,18 @@ def start_aiming(image=None, images_array=None):
     
     if images_array is not None:
         # Rotate all images 180 degrees
-        images_array = np.array([cv2.flip(img, 0) for img in images_array], dtype=np.uint8)
+        images_array = np.array([cv2.flip(undistort(img, cmx, dist), 0) for img in images_array], dtype=np.uint8)
+
+        h, w = images_array[0].shape[:2]
 
         # Get the coordinates
         coords = get_average_coordinates_from_array_of_images(images_array)
+        print(coords)
 
     if coords.size:
         # Translate the "image" coordinates to "real" coordinates (with center of the camera as origint)
-        real_points = [translate_image_point(point, current_resolution=image_resol) for point in coords]
+        real_points = [translate_image_point(point, current_resolution=(w, h)) for point in coords]
+        print(real_points)
 
         # Draw borders around the QR-code and show the frame in separate window
         # middle = find_middle(coords, give_int=True)
@@ -111,12 +119,14 @@ if __name__ == '__main__':
     g = 9.8122
 
     # Camera-related constants
-    coordinates_of_camera_with_respect_to_the_turret = (0.03, -0.035, 0.03)  # Center of the turret, needed for correct horizontal angle
-    coordinates_of_camera_with_respect_to_the_canon = (0.03, -0.125, 0.05)  # Canon itself, needed for correct vertical angle
+    coordinates_of_camera_with_respect_to_the_turret = (0.035, -0.03, 0.04)  # Center of the turret, needed for correct horizontal angle
+    coordinates_of_camera_with_respect_to_the_canon = (0.05, -0.09, 0.019)  # Canon itself, needed for correct vertical angle
 
     focus_length = 3.04*10**(-3)
     qr_width = 0.122
     image_resol = (640, 480)
+
+    cmx, dist = get_calib_params('CameraCalibration/calibration.pkl')
 
     # Initialize camera-related objects
     img_mem = SharedMemory(name='ImageMemory', create=True, size=2**22)  # Used to share images between processes

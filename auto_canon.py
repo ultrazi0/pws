@@ -97,8 +97,8 @@ if __name__ == '__main__':
     g = 9.8122
 
     # Camera-related constants
-    coordinates_of_camera_with_respect_to_the_turret = (0.03, -0.03, 0.03)  # Center of the turret, needed for correct horizontal angle
-    coordinates_of_camera_with_respect_to_the_canon = (0.045, -0.09, 0.033)  # Canon itself, needed for correct vertical angle
+    coordinates_of_camera_with_respect_to_the_turret = (0.035, -0.03, 0.04)  # Center of the turret, needed for correct horizontal angle
+    coordinates_of_camera_with_respect_to_the_canon = (0.05, -0.09, 0.015)  # Canon itself, needed for correct vertical angle
 
     focus_length = 3.04*10**(-3)
     qr_width = 0.122

@@ -29,6 +29,7 @@ def distance(coordinates, focus, qrcode_length, image_size, origin=None, return_
     LJ = get_line(L_2, J_2)
     IK = get_line(I_2, K_2)
 
+    print(LJ, IK, 'pff')
     Q_2 = find_intersect_in_plane(LJ, IK)
     Q = (Q_2[0], -focus, Q_2[1])
 

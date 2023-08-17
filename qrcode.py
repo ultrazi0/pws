@@ -56,7 +56,7 @@ def get_average_coordinates_from_array_of_images(array, target=None):
         if qr:
             qr_codes.append(qr[0][0])
     if not qr_codes:
-        return [[]]
+        return np.array([])
     qr_codes = np.array(qr_codes, dtype=np.int32)
     
     qr_codes_rounded = np.array([round(i) for i in np.mean(qr_codes, 0).flatten()], dtype=np.int32).reshape(qr_codes[0].shape)
@@ -65,7 +65,7 @@ def get_average_coordinates_from_array_of_images(array, target=None):
 
 
 if __name__ == '__main__':
-    img = cv.imread('Camera Calibration/caliResult1.png')
+    img = cv.imread('crap0.jpg')
     print(img.shape)
 
     # img = rescale(img, 1)
@@ -88,5 +88,5 @@ if __name__ == '__main__':
     else:
         print("Alas")
 
-    cv.imshow('QR', img)
-    cv.waitKey(0)
+    # cv.imshow('QR', img)
+    # cv.waitKey(0)

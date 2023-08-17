@@ -43,7 +43,7 @@ def process_capture(resol, event_closed):
         print('Capture: Closing', flush=True)
     finally:
         mem.close()
-        cap.close()
+        cap.release()
         print('Sender: Done', flush=True)
 
 
@@ -77,6 +77,8 @@ def process_show(resol, event_closed):
         event_closed.set()
         
         mem.close()
+
+        cv2.destroyAllWindows()
         print('Receiver: Done', flush=True)
 
 
