@@ -1,7 +1,6 @@
 import cv2 as cv
 import numpy as np
 from math_part import find_middle
-from recognize_circles import rescale
 from pyzbar.pyzbar import decode
 
 

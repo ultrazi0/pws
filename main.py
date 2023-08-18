@@ -8,7 +8,7 @@ from gpiozero import LED
 from stepper import Stepper
 from motor import Motor_PWM
 from time import sleep, time
-from aim import get_aim, aim
+from aim import aim
 from distance_qr import distance
 from configparser import ConfigParser
 from multiprocessing import Process, Event
@@ -18,7 +18,8 @@ from CameraCalibration.undistort import undistort, get_calib_params
 from controller import buttons, button_names, get_button, wait_for_a_controller
 from camera import process_capture, process_show, read_image_from_shared_memory
 from qrcode import get_qrcode_pyzbar, get_average_coordinates_from_array_of_images
-from math_part import find_middle, translate_origin_to_canon, translate_image_point, sin, cos, find_angle_with_drag, radians, memory_size, pi
+from math_part import translate_origin_to_canon, translate_image_point, sin, cos, find_angle_with_drag, radians, memory_size, pi
+from soundeffects import init_music, init_sounds, play_random_sound, play_sound, sound_paths, toggle_music, exit_sound_path
 
 
 def start_aiming(image=None, images_array=None):
@@ -160,12 +161,23 @@ if __name__ == '__main__':
 
         # Initialize pygame
         pygame.init()
+        pygame.mixer.init()
+
+        # Play music
+        init_music()
+        pygame.mixer.music.play()
+        music_paused = False
+
+        # Initialize sounds
+        exit_sound, sounds = list(init_sounds(exit_sound_path, sound_paths))
 
         # Wait for a controller
         control_id = wait_for_a_controller(function=front_led.toggle)
         front_led.on()
         
         # Initialize controller
+        delay_between_button_inputs = 0.25
+
         controller = control_init(control_id)
 
         while 1:
@@ -182,13 +194,27 @@ if __name__ == '__main__':
 
             # LEDs
             if control_values['D-pad-Y'] == 1:
-                if time() - last_time_a_button_was_pressed > 0.25:
+                if time() - last_time_a_button_was_pressed > delay_between_button_inputs:
                     front_led.toggle()
                 last_time_a_button_was_pressed = time()
 
+            # Stop and play music
+            if control_values['D-pad-X'] == -1:
+                if time() - last_time_a_button_was_pressed > delay_between_button_inputs:
+                    toggle_music(music_paused)
+                last_time_a_button_was_pressed = time()
+            
+            # Play random sound
+            if control_values['b']:
+                if time() - last_time_a_button_was_pressed > delay_between_button_inputs:
+                    play_random_sound(sounds, channel_id=0)
+
+                last_time_a_button_was_pressed = time()
+            
             # Shooting
             if control_values['x']:
                 if canon.check_command():
+                    play_random_sound(sounds, channel_id=0)
                     sleep(0.5)  # To ensure nothing else is moving
                     canon.shoot()
             else:
@@ -203,6 +229,7 @@ if __name__ == '__main__':
             
             if closed.is_set():
                 print('Closed via Q-button')
+                play_sound(exit_sound, 0, True)
                 break
 
             sleep(0.01)
