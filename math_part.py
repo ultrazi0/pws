@@ -8,6 +8,12 @@ def average(array):
     return sum(array)/len(array)
 
 
+def memory_size(resol, channels=3):
+    power = ceil(log2(resol[0]*resol[1]*channels))
+
+    return 2**power
+
+
 def set_angle_between_borders(angle):
     """Sets the angle between -180 and 180"""
     amount_of_semicircles = angle // 180
@@ -143,41 +149,6 @@ def find_angle_y_laser(coordinates, image_middle, known_distance, known_width, k
     angle_y = degrees(atan((middle[1]-image_middle[1])/focus))
 
     return angle_y
-
-
-def distance(coordinates, known_width_in_image, known_distance, return_middle=False):  # DOES NOT WORK -- there is a new one
-    # For clarity refer to Geogebra "perspective"
-    
-    x1, y1 = coordinates[0]  # point H
-    x2, y2 = coordinates[1]  # point G
-    x3, y3 = coordinates[2]  # point F
-    x4, y4 = coordinates[3]  # point E
-
-    GH = length_2d((x3,y3), (x2, y2))
-    
-    x_mid, y_mid = find_middle(coordinates)  # point I
-
-    x_J, y_J = find_middle([
-        [x1, y1],
-        [x_mid, y_mid],
-        [x4, y4],
-        [x_mid-GH, y_mid]  # FIXME: only when not turned
-    ])
-    
-    x_K, y_K = find_middle([
-        [x2, y2],
-        [x_mid, y_mid],
-        [x3, y3],
-        [x_mid+GH, y_mid]  # FIXME: only when not turned
-    ])
-
-    JK = length_2d((x_J, y_J), (x_K, y_K))
-    #print(x_mid, y_mid)
-    #print(coordinates, (x_mid, y_mid), (x_J, y_J), (x_K, y_K))
-
-    if return_middle:
-        return known_distance * (known_width_in_image/JK), [x_mid, y_mid]
-    return known_distance * (known_width_in_image/JK)  # FIXME: does not take offset into account
 
 
 # Distance two-dimensional space
@@ -375,25 +346,6 @@ def calculate_distance(a, b, focus, angle, length, angle_in_degrees=True):
     xm, ym = 0.5 * (xa + xb), 0.5 * (ya + yb)
 
     return sqrt(xm**2 + ym**2)
-
-
-def translate_origin_to_canon_wrongone(coordinates, offset: tuple=(0, 0)):  # FIXME: DOES NOT DO THE TRICK
-    """
-    Makes the origin coincide with the canon by translating the zero
-
-    For now works only with x- and y-coordinates
-
-    :param coordinates: array of coordinates of points that need to be translated
-    :param offset: coordinates of the canon relatively to the camera (IN PIXELS)
-    :return: new set of coordinates
-    """
-    translated = np.empty((4,2), np.int32)  # Creates an empty 2-d array 4-by-2 (4 rows, 2 columns)
-
-    for i, coords in enumerate(coordinates):
-        # Fills in 4 rows with translated coordinates
-        translated[i] = np.array([[coords[0]-offset[0], coords[1]-offset[1]]])
-    
-    return translated
 
 
 #############################

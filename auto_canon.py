@@ -51,10 +51,10 @@ def start_aiming(image, detect):
         # Print it out
         print('Distance camera:', d_camera)
 
-        # Calculate the distance and the angles from the center of the turret
+        # Calculate the distance and the angles from the center of the turret, only horizontal angle needed
         angle_turret_x, angle_turret_y, d_turret = translate_origin_to_canon(d_camera, M_coords, coordinates_of_camera_with_respect_to_the_turret)
 
-        # Calculate the distance and angles from the canon, only vertical angle needed
+        # Calculate the distance and angles from the canon
         angle_canon_x, angle_canon_y, d_canon = translate_origin_to_canon(d_camera, M_coords, coordinates_of_camera_with_respect_to_the_canon)
 
         # Horizontal angle
@@ -103,6 +103,8 @@ if __name__ == '__main__':
     focus_length = 3.04*10**(-3)
     qr_width = 0.122
     image_size = (640, 480)
+    
+    cmx, dist = get_calib_params('CameraCalibration/calibration.pkl')
 
     # Initialize camera
     cap = camera_init(image_size[0], image_size[1])  # Camera initialization
@@ -128,7 +130,6 @@ if __name__ == '__main__':
     canon = Canon(5, 3, 7, 36, config)
 
     # Main loop
-    cmx, dist = get_calib_params('CameraCalibration/calibration.pkl')
     try:
         while 1:
             success, img = cap.read()  # Read frame

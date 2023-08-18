@@ -5,7 +5,7 @@ from recognize_circles import rescale
 from pyzbar.pyzbar import decode
 
 
-def sort_numpy_array(array):  # Thanks, ChatGPT
+def sort_numpy_array(array):
     # Find the point closest to the top-left corner (point with the minimum sum of x and y coordinates)
     start_point_index = np.argmin(np.sum(array, axis=1))
 
@@ -38,7 +38,6 @@ def get_qrcode_pyzbar(img, target=None):
             if string != target:
                 continue
         
-        #array = np.array(d.polygon)  # Translate the array to numpy array
         array = np.flip(np.array(d.polygon), axis = 0)  # Translate the array to numpy array and reverse the order of the points, 
                                                         # so that it has the same form as with Open CV
 

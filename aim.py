@@ -1,29 +1,9 @@
-from math import atan, degrees, asin
 from time import sleep
-from math_part import find_middle, angle_turret, angle_canon
-from distance_qr import distance
+from math_part import angle_turret, angle_canon
 from servo import Servo
 from stepper import Stepper
 from configparser import ConfigParser
 
-
-def get_aim(coords, middle, known_width_in_image, known_distance, known_width):
-    x, y = find_middle(coords)
-
-    offset_x = x - middle[0]
-    offset_y = y - middle[1]
-    d = distance(coords, known_width_in_image, known_distance)
-
-    # Stepper
-    # FIXME: tangent or cosinus - should be checked, depends on the way the distance is measured
-    tangent_x = (offset_x * (known_width/known_width_in_image)) / d
-    angle_x = degrees(atan(tangent_x))
-
-    # Servo
-    tangent_y = (offset_y * (known_width/known_width_in_image)) / d
-    angle_y = degrees(atan(tangent_y))
-
-    return angle_x, angle_y
 
 def aim(angles, stepper, servo, config, delay=None):
     angle_x, angle_y = angles

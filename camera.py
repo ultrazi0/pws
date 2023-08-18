@@ -1,10 +1,8 @@
 import cv2
 import numpy as np
 from qrcode import get_qrcode_pyzbar
-from math_part import find_middle, find_angle_x, find_angle_y_laser, find_focus_length
-from aim import get_aim
-from distance_qr import distance
-from time import sleep, time
+from math_part import find_middle
+from time import sleep
 from multiprocessing import Process, Event
 from multiprocessing.shared_memory import SharedMemory
 from os import getpid

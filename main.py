@@ -2,23 +2,23 @@ import cv2
 import pygame
 import numpy as np
 import RPi.GPIO as GPIO
-from gpiozero import LED
-from time import sleep, time
-from motor import Motor_PWM
-from controller import buttons, button_names, get_button, wait_for_a_controller
-from controller import initialize as control_init
-from camera import process_capture, process_show, read_image_from_shared_memory
 from servo import Servo
-from stepper import Stepper
 from canon import Canon
-from configparser import ConfigParser
+from gpiozero import LED
+from stepper import Stepper
+from motor import Motor_PWM
+from time import sleep, time
 from aim import get_aim, aim
-from math_part import find_middle, translate_origin_to_canon, translate_image_point, sin, cos, find_angle_with_drag, radians, pi
-from qrcode import get_qrcode_pyzbar, get_average_coordinates_from_array_of_images
 from distance_qr import distance
+from configparser import ConfigParser
 from multiprocessing import Process, Event
+from controller import initialize as control_init
 from multiprocessing.shared_memory import SharedMemory
 from CameraCalibration.undistort import undistort, get_calib_params
+from controller import buttons, button_names, get_button, wait_for_a_controller
+from camera import process_capture, process_show, read_image_from_shared_memory
+from qrcode import get_qrcode_pyzbar, get_average_coordinates_from_array_of_images
+from math_part import find_middle, translate_origin_to_canon, translate_image_point, sin, cos, find_angle_with_drag, radians, memory_size, pi
 
 
 def start_aiming(image=None, images_array=None):
@@ -26,6 +26,7 @@ def start_aiming(image=None, images_array=None):
 
     #cv2.imwrite('crap0.jpg', image)
     if image is not None:
+        # Undistort the image
         image = undistort(image, cmx, dist)
         h, w = image.shape[:2]
 
@@ -36,33 +37,17 @@ def start_aiming(image=None, images_array=None):
         coords = qr[0][0] if qr else np.array([]) # Get the coordinates
     
     if images_array is not None:
-        # Rotate all images 180 degrees
+        # Undistort and rotate all images 180 degrees
         images_array = np.array([cv2.flip(undistort(img, cmx, dist), 0) for img in images_array], dtype=np.uint8)
 
         h, w = images_array[0].shape[:2]
 
         # Get the coordinates
         coords = get_average_coordinates_from_array_of_images(images_array)
-        print(coords)
 
     if coords.size:
         # Translate the "image" coordinates to "real" coordinates (with center of the camera as origint)
         real_points = [translate_image_point(point, current_resolution=(w, h)) for point in coords]
-        print(real_points)
-
-        # Draw borders around the QR-code and show the frame in separate window
-        # middle = find_middle(coords, give_int=True)
-        # print(middle, 'ff')
-        # image = cv2.polylines(image, [coords], 1, (0, 255, 0), 2)
-        # cv2.circle(image, middle, 2, (0, 0, 255), -1)
-        # cv2.circle(image, (320, 240), 3, (255, 0, 0), -1)
-        
-        # # Show the image with the target
-        # cv2.imshow('Target', cv2.rotate(image, cv2.ROTATE_180))
-        # cv2.circle(image, tuple(coords[0]), 5, (255, 0, 0), -1)
-        # cv2.circle(image, tuple(coords[1]), 5, (0, 0, 255), -1)
-        # cv2.circle(image, tuple(coords[2]), 5, (0, 255, 255), -1)
-        # cv2.imwrite('crap.jpg', image)
 
         ###########################
 
@@ -72,10 +57,10 @@ def start_aiming(image=None, images_array=None):
         # Print it out
         print('Distance camera:', d_camera)
 
-        # Calculate the distance and the angles from the center of the turret
+        # Calculate the distance and the angles from the center of the turret, only horizontal angle needed
         angle_turret_x, angle_turret_y, d_turret = translate_origin_to_canon(d_camera, M_coords, coordinates_of_camera_with_respect_to_the_turret)
 
-        # Calculate the distance and angles from the canon, only vertical angle needed
+        # Calculate the distance and angles from the canon
         angle_canon_x, angle_canon_y, d_canon = translate_origin_to_canon(d_camera, M_coords, coordinates_of_camera_with_respect_to_the_canon)
 
         # Horizontal angle
@@ -126,10 +111,12 @@ if __name__ == '__main__':
     qr_width = 0.122
     image_resol = (640, 480)
 
-    cmx, dist = get_calib_params('CameraCalibration/calibration.pkl')
+    cmx, dist = get_calib_params('CameraCalibration/calibration.pkl')  # Parameters for camera calibration
 
     # Initialize camera-related objects
-    img_mem = SharedMemory(name='ImageMemory', create=True, size=2**22)  # Used to share images between processes
+    mem_size = memory_size(image_resol)  # Calculate the memory size needed for that resolution
+
+    img_mem = SharedMemory(name='ImageMemory', create=True, size=mem_size)  # Used to share images between processes
     closed = Event()  # Needed to indicate that processes should close 
 
     # Process that captures and sends images
