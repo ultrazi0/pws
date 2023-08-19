@@ -64,3 +64,5 @@ fi
 if [ -n "${BASH:-}" -o -n "${ZSH_VERSION:-}" ] ; then
     hash -r 2> /dev/null
 fi
+
+export PYGAME_DETECT_AVX2=1

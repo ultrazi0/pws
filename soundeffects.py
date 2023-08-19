@@ -57,6 +57,7 @@ def init_sounds(*args):
 
 
 def play_sound(sound, channel_id=None, wait=False):
+
     if channel_id is not None:
         pygame.mixer.Channel(channel_id).play(sound)
     else:
@@ -76,10 +77,17 @@ def play_random_sound(sounds, channel_id=None):
 if __name__ == "__main__":
     pygame.init()
     pygame.mixer.init()
+    init_music()
     exit_sound, sounds = list(init_sounds(sound_paths, exit_sound_path))
 
-    play_sound(sounds['the republic will be reorganised'], channel_id=0)
-    sleep(2)
-    play_sound(exit_sound, channel_id=0)
+    toggle_music(True)
+    input('eee..')
+
+    #pygame.mixer.music.set_volume(0.05)
+    #sleep(3)
+
+    play_sound(sounds['execute order 66'], channel_id=1)
+    #input()
+    #play_sound(exit_sound, channel_id=0)
 
     input('Press Enter to end the program...')

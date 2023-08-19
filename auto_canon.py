@@ -1,5 +1,6 @@
+import cv2
 import RPi.GPIO as gp
-from recog import initialize as camera_init, cv2
+from camera import initialize as camera_init
 from servo import Servo
 from stepper import Stepper
 from canon import Canon
@@ -14,7 +15,7 @@ from CameraCalibration.undistort import *
 
 def start_aiming(image, detect):
     cv2.imwrite('crap0.jpg', image)
-    image = undistort(image, cmx, dist)
+    #image = undistort(image, cmx, dist)
 
     # Rotate the image, because the camera actually sees an inverted image
     image = cv2.flip(image, 0)
@@ -98,7 +99,7 @@ if __name__ == '__main__':
 
     # Camera-related constants
     coordinates_of_camera_with_respect_to_the_turret = (0.035, -0.03, 0.04)  # Center of the turret, needed for correct horizontal angle
-    coordinates_of_camera_with_respect_to_the_canon = (0.05, -0.09, 0.015)  # Canon itself, needed for correct vertical angle
+    coordinates_of_camera_with_respect_to_the_canon = (0.034, -0.09, 0.015)  # Canon itself, needed for correct vertical angle
 
     focus_length = 3.04*10**(-3)
     qr_width = 0.122

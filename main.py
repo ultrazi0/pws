@@ -151,7 +151,7 @@ if __name__ == '__main__':
 
     # Initialize LEDs
     last_time_a_button_was_pressed = -1
-    front_led = LED('BOARD23')  # Use gpiozero numeration
+    front_led = LED('BOARD22')  # Use gpiozero numeration
 
     # Main loop
     try:
@@ -201,7 +201,7 @@ if __name__ == '__main__':
             # Stop and play music
             if control_values['D-pad-X'] == -1:
                 if time() - last_time_a_button_was_pressed > delay_between_button_inputs:
-                    toggle_music(music_paused)
+                    music_paused = toggle_music(music_paused)
                 last_time_a_button_was_pressed = time()
             
             # Play random sound
