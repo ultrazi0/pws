@@ -455,6 +455,91 @@ def translate_image_point(point_image, current_resolution=(640, 480), sensor_siz
     return (x_P_m, y_P_m)
 
 
+def calculate_3d_point(distance: float, angle_x: float, angle_y: float) -> tuple:
+    """
+    Returns the coordinates of a point in space
+    :param distance: distance to the point
+    :param angle_x: horizontal angle in respect to origin \\ IN RADIANS
+    :param angle_y: vertical angle in respoect to origin \\ IN RADIANS
+    :return: tuple of 3 elements -- coordinates
+    """
+    x = distance * sin(angle_x) * (1 - sin(angle_y)*tan(angle_y/2))
+    y = -distance * cos(angle_x) * (1 - sin(angle_y)*tan(angle_y/2))
+    z = distance * sin(angle_y)
+
+    return x, y, z
+
+
+def real_point(point, focus, angle_x, angle_y, origin=(0, 0, 0)):
+    # Refer to GeoGebra "translate_to_vertical"
+
+    x_coord = point[0]
+    y_coord = point[1]
+
+    OC = sqrt(focus**2 + y_coord**2)
+
+    angle_COA = atan(y_coord/focus)
+
+    angle_EOC = angle_y + angle_COA
+
+    C = calculate_3d_point(OC, angle_x, angle_EOC)
+
+    E = (C[0], C[1], origin[2])
+
+    OE = sqrt((E[0]-origin[0])**2+(E[1]-origin[1])**2+(E[2]-origin[2])**2)
+
+    angle_DOE = atan(x_coord/OE)
+
+    angle_yOD = angle_x + angle_DOE
+
+    OD = sqrt(OE**2 + x_coord**2)
+
+    D = calculate_3d_point(OD, angle_yOD, 0)
+
+    OM_accent = sqrt(focus**2+x_coord**2+y_coord**2)
+
+    DM_accent = sqrt(OM_accent**2 - OD**2)
+
+    if y_coord > 0:
+        M_accent = (D[0], D[1], origin[2]+DM_accent)
+    else:
+        M_accent = (D[0], D[1], origin[2]-DM_accent)
+
+    return M_accent
+
+
+def translate_point_to_vertical_plane(point_2d, angle_x, angle_y, focus_length=3.04*10**(-3), origin=(0, 0, 0), angles_in_degrees=True, return_two=False):
+    if angles_in_degrees:
+        angle_x = radians(angle_x)
+        angle_y = radians(angle_y)
+
+    point_3d = real_point(point_2d, focus_length, angle_x, angle_y, origin)
+    print("M':", point_3d)
+
+    point_x = point_3d[0]
+    point_y = point_3d[1]
+    point_z = point_3d[2]
+
+    plane = [0., 0., 0., 0.]  # Plane equation ax + by + cz + d = 0, where a, b, c, d are the elements
+
+    # Vertical plane
+    plane[1] = 1  # y = 1
+    plane[3] = focus_length  # d = focus_length
+    # Equation: y = -focus_length
+
+    t = - (plane[0]*origin[0] + plane[1]*origin[1] + plane[2]*origin[2] + plane[3])/(plane[0]*(point_x-origin[0]) + plane[1]*(point_y-origin[1]) + plane[2]*(point_z-origin[2]))
+    
+    x_accent = origin[0] + t*(point_x-origin[0])
+    y_accent = origin[1] + t*(point_y-origin[1])
+    z_accent = origin[2] + t*(point_z-origin[2])
+
+    if return_two:
+        return x_accent, z_accent
+    return x_accent, y_accent, z_accent
+
+
+
+
 # Angle with drag
 def find_angle_with_drag(x: float, y: float, m: float, v0: float,
                             k: float, g: float = 9.81, give_degrees: bool = True) -> float:
@@ -526,14 +611,23 @@ if __name__ == '__main__':
     config_file = 'cfg.ini'
     config.read(config_file)
 
-    d = 0.6
-    O_coords = (0.03, -0.11, 0.04)
-    M_coords = (
-        0.0002825,
-        -0.00304,
-        -0.000563
-    )
+    focus_length = 0.00304
+    angle_x = 0
+    angle_y = 0
+    m = [
+        0.00035075,
+        0.00019549999999999998
+    ]
+
+    print("M'':", translate_point_to_vertical_plane(m, angle_x, angle_y, focus_length))
+
+    # d = 0.6
+    # O_coords = (0.03, -0.11, 0.04)
+    # M_coords = (
+    #     0.0002825,
+    #     -0.00304,
+    #     -0.000563
+    # )
 
 
-    print(translate_image_point((188,100), (454, 270)))
-    print(translate_origin_to_canon(d, M_coords, O_coords, focus_length=3.04*10**(-3)))
+    # print(translate_origin_to_canon(d, M_coords, O_coords, focus_length=3.04*10**(-3)))

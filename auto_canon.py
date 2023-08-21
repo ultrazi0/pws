@@ -7,7 +7,7 @@ from canon import Canon
 from configparser import ConfigParser
 from aim import aim
 from qrcode import get_qrcode_pyzbar
-from math_part import find_middle, translate_origin_to_canon, translate_image_point, sin, cos, find_angle_with_drag, radians, pi, atan, degrees
+from math_part import find_middle, translate_origin_to_canon, translate_image_point, sin, cos, find_angle_with_drag, radians, pi, atan, degrees, translate_point_to_vertical_plane
 from distance_qr import distance
 from time import sleep
 from CameraCalibration.undistort import *
@@ -15,9 +15,9 @@ from CameraCalibration.undistort import *
 
 def start_aiming(image, detect):
     cv2.imwrite('crap0.jpg', image)
-    #image = undistort(image, cmx, dist)
+    image = undistort(image, cmx, dist)
 
-    # Rotate the image, because the camera actually sees an inverted image
+    # Mirror the image, because the camera actually sees an inverted image
     image = cv2.flip(image, 0)
     print(image.size)
 
@@ -27,6 +27,9 @@ def start_aiming(image, detect):
 
         # Translate the "image" coordinates to "real" coordinates (with center of the camera as origin)
         real_points = [translate_image_point(point, current_resolution=(image.shape[1], image.shape[0])) for point in coords]
+
+        # Project the real coordinates on the vertical plane
+        real_points = [translate_point_to_vertical_plane(point, angle_camera_x, angle_camera_y, focus_length, return_two=True) for point in real_points]
         print(real_points)
 
         # Draw borders around the QR-code and show the frame in separate window
@@ -99,7 +102,10 @@ if __name__ == '__main__':
 
     # Camera-related constants
     coordinates_of_camera_with_respect_to_the_turret = (0.035, -0.03, 0.04)  # Center of the turret, needed for correct horizontal angle
-    coordinates_of_camera_with_respect_to_the_canon = (0.034, -0.09, 0.015)  # Canon itself, needed for correct vertical angle
+    coordinates_of_camera_with_respect_to_the_canon = (0.034, -0.1, 0.045)  # Canon itself, needed for correct vertical angle
+
+    angle_camera_x = 0
+    angle_camera_y = 0
 
     focus_length = 3.04*10**(-3)
     qr_width = 0.122
