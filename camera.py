@@ -14,6 +14,28 @@ def initialize(frame_width: int =640, frame_height: int =480, camera: int =0):
     return cap
 
 
+def edit_image(image, val=None):
+    height, width = image.shape[:2]
+
+    cv2.circle(image, (width//2, height//2), 3, (255, 0, 0), -1)
+
+    if val is not None:
+        turret_angle = round(val.value, 1)
+        string = 'Turret angle: ' + str(turret_angle)
+
+        image = cv2.putText(
+            img = image,
+            text = string,
+            org = (width-250, 25),
+            fontFace = cv2.FONT_HERSHEY_DUPLEX,
+            fontScale = 0.75,
+            color = (125, 246, 55),
+            thickness = 2
+        )
+    
+    return image
+
+
 def process_capture(resol, event_closed):
     print(f'Capture process ({getpid()}): Running', flush=True)
 
@@ -45,7 +67,7 @@ def process_capture(resol, event_closed):
         print('Sender: Done', flush=True)
 
 
-def process_show(resol, event_closed):
+def process_show(resol, event_closed, config=None):
     print(f'Receiver process ({getpid()}): Running', flush=True)
 
     image_channels = 3
@@ -59,7 +81,7 @@ def process_show(resol, event_closed):
             img = np.ndarray(shape=(resol[1], resol[0], image_channels), buffer=mem.buf, dtype=np.uint8)
 
             # Show image
-            cv2.circle(img, (img.shape[1]//2, img.shape[0]//2), 3, (255, 0, 0), -1)
+            img = edit_image(img, config)
             cv2.imshow('Camera', img)
             k = cv2.waitKey(1)
 

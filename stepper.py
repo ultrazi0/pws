@@ -58,7 +58,7 @@ class Stepper:
         self.turret_angle = float(config['values']['turret angle']) if (config is not None) else None
     
     # Rotates stepper by a specified amount of steps
-    def rotate(self, steps, method=fullstepping_light, delay=0.001, turn_coefficient=1):
+    def rotate(self, steps, method=fullstepping_power, delay=0.001, turn_coefficient=1):
         steps = round(steps * turn_coefficient)
         
         # Method choosing -- two available

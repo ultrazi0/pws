@@ -11,8 +11,8 @@ from time import sleep, time
 from aim import aim
 from distance_qr import distance
 from configparser import ConfigParser
-from multiprocessing import Process, Event
 from controller import initialize as control_init
+from multiprocessing import Process, Event, Value
 from multiprocessing.shared_memory import SharedMemory
 from CameraCalibration.undistort import undistort, get_calib_params
 from controller import buttons, button_names, get_button, wait_for_a_controller
@@ -119,11 +119,14 @@ if __name__ == '__main__':
 
     img_mem = SharedMemory(name='ImageMemory', create=True, size=mem_size)  # Used to share images between processes
     closed = Event()  # Needed to indicate that processes should close 
+    
+    # Shared float value to show current turret angle
+    shared_turret_angle = Value('f')
 
     # Process that captures and sends images
     capture = Process(target=process_capture, args=(image_resol, closed))
     # Process taht reads and shows images
-    show = Process(target=process_show, args=(image_resol, closed))
+    show = Process(target=process_show, args=(image_resol, closed, shared_turret_angle))
 
 
     # Initialize servo to lift the canon
@@ -189,8 +192,12 @@ if __name__ == '__main__':
             m2.move(-control_values['axis1'], control_values['axis0'])
 
             # The turret
-            servo.rotate_by(-control_values['axis3'], do_not_use_sleep=True)  # Up/Down
+            up_or_down_value = (control_values['axis4']+1)/2 - (control_values['axis5']+1)/2
+            servo.rotate_by(up_or_down_value, do_not_use_sleep=True)  # Up/Down
             stepper.rotate(control_values['axis2'], turn_coefficient=50, delay=0.002)  # Left/Right
+
+            # Update the turret angle
+            shared_turret_angle.value = stepper.turret_angle
 
             # LEDs
             if control_values['D-pad-Y'] == 1:
