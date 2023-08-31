@@ -500,7 +500,7 @@ def real_point(point, focus, angle_x, angle_y, origin=(0, 0, 0)):
 
     DM_accent = sqrt(OM_accent**2 - OD**2)
 
-    if y_coord > 0:
+    if angle_EOC > 0:
         M_accent = (D[0], D[1], origin[2]+DM_accent)
     else:
         M_accent = (D[0], D[1], origin[2]-DM_accent)
