@@ -5,6 +5,6 @@
 "initial velocity" - initial velocity of a projectile. [m/s]
 "x0" - position of a shooting point [m]
 "y0" - hight of a shooting point relative to the groud [m]
-"dx" - horizontal distance between stepper axis and canon axis. [mm]
-"dy" - horizontal distance between stepper axis and canon axis. [mm]
-"r" - radius of a disk that is connected to the canon
+"dx" - horizontal distance between stepper axis and cannon axis. [mm]
+"dy" - horizontal distance between stepper axis and cannon axis. [mm]
+"r" - radius of a disk that is connected to the cannon

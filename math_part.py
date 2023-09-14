@@ -36,20 +36,20 @@ def angle_turret(turret_angle, number_of_teeth_stepper=None, number_of_teeth_tur
     return turret_angle * number_of_teeth_turret / number_of_teeth_stepper
 
 
-def angle_canon(canon_angle, dx, dy, r, give_degrees=True, **kwargs):
-    canon_angle = radians(canon_angle)
+def angle_cannon(cannon_angle, dx, dy, r, give_degrees=True, **kwargs):
+    cannon_angle = radians(cannon_angle)
 
     ab = kwargs['ab'] if 'ab' in kwargs else sqrt(dx**2 + dy**2)
     phi = kwargs['phi'] if 'phi' in kwargs else atan(dy/dx)
     
     max_angle_beta = asin(r/ab) + phi
-    if canon_angle > max_angle_beta:
+    if cannon_angle > max_angle_beta:
         print('Sorry, Sir! The turret cannot go that high.\n' +
               '    We will still lift it as high as possible though')
         angle_alpha = pi + phi + asin(dy/r) - acos(r/ab)
     else:
-        theta = asin(sin(canon_angle-phi)*ab/r)
-        angle_alpha = theta + canon_angle + asin(dy/r)
+        theta = asin(sin(cannon_angle-phi)*ab/r)
+        angle_alpha = theta + cannon_angle + asin(dy/r)
 
     if give_degrees:
         return degrees(angle_alpha)
@@ -349,7 +349,7 @@ def calculate_distance(a, b, focus, angle, length, angle_in_degrees=True):
 
 
 #############################
-# Translate origin to canon #
+# Translate origin to cannon #
 #############################
 
 def angle_with_cosine_theorem(a, b, c):
@@ -359,19 +359,19 @@ def angle_with_cosine_theorem(a, b, c):
 def c_with_cosine_theorem(a, b, angle):
     return sqrt(a**2+b**2-2*a*b*cos(angle))
 
-def translate_origin_to_canon(d, M_coords, O_coords, focus_length=(3.04*10**(-3))) -> tuple:
+def translate_origin_to_cannon(d, M_coords, O_coords, focus_length=(3.04*10**(-3))) -> tuple:
     """
-    Gives data needed to aim the canon itself: both parts of the angle and the distance from the canon
+    Gives data needed to aim the cannon itself: both parts of the angle and the distance from the cannon
 
     :param d: distance from the camera (IN METERS)
     :param M_coords: coordinates of middle of the image (IN METERS)
-    :param O_coords: coordinates of the camera when the canon is the origin (IN METERS)
+    :param O_coords: coordinates of the camera when the cannon is the origin (IN METERS)
     :param focus_length: focal length of the camera (IN METERS)
-    :return: tuple: (x-angle, y-angle, distance from canon)
+    :return: tuple: (x-angle, y-angle, distance from cannon)
     """
     O = O_coords  # Coordinates of the camera
 
-    # Coordinates of the point M' in the coordinate system with canon as origin
+    # Coordinates of the point M' in the coordinate system with cannon as origin
     x_M = M_coords[0] + O[0]
     z_M = M_coords[2] + O[2]
     y_M = O_coords[1] - focus_length
@@ -382,7 +382,7 @@ def translate_origin_to_canon(d, M_coords, O_coords, focus_length=(3.04*10**(-3)
     # m_accent = M_coords  # Debug mode (un)comment if needed
 
     OM = d
-    Q = (0, 0, 0)  # Coordinates of the canon, better leave as (0, 0, 0)
+    Q = (0, 0, 0)  # Coordinates of the cannon, better leave as (0, 0, 0)
 
     # Refer to geogebra for clarity
     OM_accent = length_3d(O, m_accent)
@@ -500,7 +500,7 @@ def real_point(point, focus, angle_x, angle_y, origin=(0, 0, 0)):
 
     DM_accent = sqrt(OM_accent**2 - OD**2)
 
-    if y_coord > 0:
+    if angle_EOC > 0:
         M_accent = (D[0], D[1], origin[2]+DM_accent)
     else:
         M_accent = (D[0], D[1], origin[2]-DM_accent)
@@ -620,14 +620,3 @@ if __name__ == '__main__':
     ]
 
     print("M'':", translate_point_to_vertical_plane(m, angle_x, angle_y, focus_length))
-
-    # d = 0.6
-    # O_coords = (0.03, -0.11, 0.04)
-    # M_coords = (
-    #     0.0002825,
-    #     -0.00304,
-    #     -0.000563
-    # )
-
-
-    # print(translate_origin_to_canon(d, M_coords, O_coords, focus_length=3.04*10**(-3)))

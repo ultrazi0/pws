@@ -2,28 +2,28 @@ import cv2
 import pygame
 import numpy as np
 import RPi.GPIO as GPIO
-from servo import Servo
-from canon import Canon
+from turret.cannon import Cannon
 from gpiozero import LED
-from stepper import Stepper
-from motor import Motor_PWM
+from motors import Motor_PWM, Servo, Stepper
 from time import sleep, time
-from aim import aim
-from distance_qr import distance
+from turret.aim import aim
+from turret.distance_qr import distance
 from configparser import ConfigParser
 from controller import initialize as control_init
 from multiprocessing import Process, Event, Value
 from multiprocessing.shared_memory import SharedMemory
 from CameraCalibration.undistort import undistort, get_calib_params
 from controller import buttons, button_names, get_button, wait_for_a_controller
-from camera import process_capture, process_show, read_image_from_shared_memory
-from qrcode import get_qrcode_pyzbar, get_average_coordinates_from_array_of_images
-from math_part import translate_origin_to_canon, translate_image_point, sin, cos, find_angle_with_drag, radians, memory_size, pi
-from soundeffects import init_music, init_sounds, play_random_sound, play_sound, sound_paths, toggle_music, exit_sound_path
+from camera.camera import process_capture, process_show, read_image_from_shared_memory
+from camera.qrcode import get_qrcode_pyzbar, get_average_coordinates_from_array_of_images
+from math_part import translate_origin_to_cannon, translate_image_point, sin, cos, find_angle_with_drag, radians, memory_size, pi
+from soundeffects import *
 
 
 def start_aiming(image=None, images_array=None):
     assert (image is not None) or (images_array is not None)
+
+    success = None
 
     #cv2.imwrite('crap0.jpg', image)
     if image is not None:
@@ -59,34 +59,36 @@ def start_aiming(image=None, images_array=None):
         print('Distance camera:', d_camera)
 
         # Calculate the distance and the angles from the center of the turret, only horizontal angle needed
-        angle_turret_x, angle_turret_y, d_turret = translate_origin_to_canon(d_camera, M_coords, coordinates_of_camera_with_respect_to_the_turret)
+        angle_turret_x, angle_turret_y, d_turret = translate_origin_to_cannon(d_camera, M_coords, coordinates_of_camera_with_respect_to_the_turret)
 
-        # Calculate the distance and angles from the canon
-        angle_canon_x, angle_canon_y, d_canon = translate_origin_to_canon(d_camera, M_coords, coordinates_of_camera_with_respect_to_the_canon)
+        # Calculate the distance and angles from the cannon
+        angle_cannon_x, angle_cannon_y, d_cannon = translate_origin_to_cannon(d_camera, M_coords, coordinates_of_camera_with_respect_to_the_cannon)
 
         # Horizontal angle
         angle_x = angle_turret_x
 
         # Vertical angle
-        x_distance = d_canon * cos(radians(angle_canon_y))
-        y_distance = d_canon * sin(radians(angle_canon_y))
+        x_distance = d_cannon * cos(radians(angle_cannon_y))
+        y_distance = d_cannon * sin(radians(angle_cannon_y))
 
-        print('an', angle_canon_y)
+        print('an', angle_cannon_y)
         angle_y = find_angle_with_drag(x_distance, y_distance, mass, initial_velocity, coefficient, g)
 
         # Print everything out
-        print("Distance canon", d_canon)
+        print("Distance cannon", d_cannon)
         print('x-angle:', angle_x)
         print('y-angle:', angle_y)
         
         # Aim
         aim((angle_x, angle_y), stepper, servo, config, delay=1)
+
+        success = True
     else:
         print('Nothing, Sir!')
+        success = False
     
     print("We're done, Sir!")
-
-
+    return success
 
 
 if __name__ == '__main__':
@@ -106,7 +108,7 @@ if __name__ == '__main__':
 
     # Camera-related constants
     coordinates_of_camera_with_respect_to_the_turret = (0.035, -0.03, 0.04)  # Center of the turret, needed for correct horizontal angle
-    coordinates_of_camera_with_respect_to_the_canon = (0.05, -0.09, 0.019)  # Canon itself, needed for correct vertical angle
+    coordinates_of_camera_with_respect_to_the_cannon = (0.05, -0.09, 0.019)  # Cannon itself, needed for correct vertical angle
 
     focus_length = 3.04*10**(-3)
     qr_width = 0.122
@@ -129,12 +131,12 @@ if __name__ == '__main__':
     show = Process(target=process_show, args=(image_resol, closed, shared_turret_angle))
 
 
-    # Initialize servo to lift the canon
+    # Initialize servo to lift the cannon
     dy = float(config['constants']['dy'])
     r = float(config['constants']['r'])
     start_angle = 52  # Angle between the servo's "original" zero-position 
-                      # and the line that goes through the certer of the disk and is parallel to canon's zero-angle
-                      # this parameter is used to set up the zero-position of the canon correctly
+                      # and the line that goes through the certer of the disk and is parallel to cannon's zero-angle
+                      # this parameter is used to set up the zero-position of the cannon correctly
     
     servo = Servo(24, dy=dy, r=r, start_angle=start_angle, initial_angle=0)  # Use GPIO numeration
 
@@ -149,8 +151,8 @@ if __name__ == '__main__':
     m1 = Motor_PWM(21, 19, 'l', min_speed=20, min_activation_speed=20)
     m2 = Motor_PWM(8, 10, 'r', min_speed=20, min_activation_speed=20)
        
-    # Initialize canon
-    canon = Canon(5, 3, 7, 36, config)
+    # Initialize cannon
+    cannon = Cannon(5, 3, 7, 36, config)
 
     # Initialize LEDs
     last_time_a_button_was_pressed = -1
@@ -172,7 +174,13 @@ if __name__ == '__main__':
         music_paused = False
 
         # Initialize sounds
-        exit_sound, sounds = list(init_sounds(exit_sound_path, sound_paths))
+        exit_sound = init_one_sound(exit_sound_path)
+        starwars_sounds = init_sounds(sound_paths_starwars)
+
+        sounds_aim = init_sounds(sound_paths_aim)
+        sounds_shoot = init_sounds(sound_paths_shoot)
+
+        current_sound_mode = 'starcraft'
 
         # Wait for a controller
         control_id = wait_for_a_controller(function=front_led.toggle)
@@ -211,28 +219,58 @@ if __name__ == '__main__':
                     music_paused = toggle_music(music_paused)
                 last_time_a_button_was_pressed = time()
             
+            # Switch between StarWars shooting sounds and StarCraft
+            if control_values['D-pad-X'] == 1:
+                if time() - last_time_a_button_was_pressed > delay_between_button_inputs:
+                    if current_sound_mode == 'starcraft':
+                        play_random_sound(starwars_sounds, channel_id=0)
+                        current_sound_mode = 'starwars'
+                    elif current_sound_mode == 'starwars':
+                        play_sound(sounds_shoot['orders sir'], channel_id=0)
+                        current_sound_mode = 'starcraft'
+                last_time_a_button_was_pressed = time()
+            
+            # Stop any sound playing
+            if control_values['D-pad-Y'] == -1:
+                if time() - last_time_a_button_was_pressed > delay_between_button_inputs:
+                    stop_sound_on_channel(channel_id=0)
+                last_time_a_button_was_pressed = time()
+            
             # Play random sound
             if control_values['b']:
                 if time() - last_time_a_button_was_pressed > delay_between_button_inputs:
-                    play_random_sound(sounds, channel_id=0)
+                    play_random_sound(starwars_sounds, channel_id=0)
 
                 last_time_a_button_was_pressed = time()
             
             # Shooting
             if control_values['x']:
-                if canon.check_command():
-                    play_random_sound(sounds, channel_id=0)
+                if cannon.check_command():
+                    play_sound(sounds_shoot['yes sir'], channel_id=0, wait=True)
                     sleep(0.5)  # To ensure nothing else is moving
-                    canon.shoot()
+                    play_sound(sounds_shoot['tank setting up'], channel_id=0, wait=True)
+                    cannon.shoot()
+
+                    if current_sound_mode == 'starcraft':
+                        play_random_sound_from_selection(sounds_shoot, channel_id=0, wait=True, selection=['tta-ta-ta-da', 'justice'])
+                    elif current_sound_mode == 'starwars':
+                        play_random_sound(starwars_sounds, channel_id=0)
             else:
-                canon.last_time_check = -1
+                cannon.last_time_check = -1
             
             # Aiming
             if control_values['lb']:
                 # If LB or Space is pressed
+                play_sound(sounds_aim['identify target'], channel_id=0, wait=True)
 
                 img = read_image_from_shared_memory(image_resol, n=1)
-                start_aiming(images_array=img)
+                success = start_aiming(images_array=img)
+
+                if success:
+                    play_sound(sounds_aim['nuclear missle ready'], channel_id=0, wait=True)
+                else:
+                    play_sound(sounds_aim['not enough energy'], channel_id=0, wait=True)
+                    
             
             if closed.is_set():
                 print('Closed via Q-button')
