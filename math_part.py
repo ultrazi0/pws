@@ -620,3 +620,14 @@ if __name__ == '__main__':
     ]
 
     print("M'':", translate_point_to_vertical_plane(m, angle_x, angle_y, focus_length))
+
+    # d = 0.6
+    # O_coords = (0.03, -0.11, 0.04)
+    # M_coords = (
+    #     0.0002825,
+    #     -0.00304,
+    #     -0.000563
+    # )
+
+
+    # print(translate_origin_to_canon(d, M_coords, O_coords, focus_length=3.04*10**(-3)))
