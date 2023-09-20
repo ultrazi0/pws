@@ -4,7 +4,7 @@
 "number of teeth turret" - number of teeth on a gear that rotates turret
 "initial velocity" - initial velocity of a projectile. [m/s]
 "x0" - position of a shooting point [m]
-"y0" - hight of a shooting point relative to the groud [m]
+"y0" - height of a shooting point relative to the ground [m]
 "dx" - horizontal distance between stepper axis and cannon axis. [mm]
 "dy" - horizontal distance between stepper axis and cannon axis. [mm]
 "r" - radius of a disk that is connected to the cannon

@@ -9,7 +9,7 @@ class Cannon:
         in1 - the positive pole;
         in2 - the negative pole;
         en - the enable pin;
-        trigger_switch - the pin that shows wheather the cannon is charged 
+        trigger_switch - the pin that shows whether the cannon is charged
         """
         self.plus = in1
         self.min = in2

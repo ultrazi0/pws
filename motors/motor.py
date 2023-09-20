@@ -2,6 +2,7 @@ import RPi.GPIO as gp
 from time import sleep
 from numpy import sign
 
+
 class Motor():  # This class was used to drive motors with L293N, not it's practically useless
     def __init__(self, plus, min, en, side, min_speed=0, min_activation_speed=None) -> None:
         self.plus = plus
@@ -58,13 +59,11 @@ class Motor():  # This class was used to drive motors with L293N, not it's pract
             gp.output(self.min, 1)
             gp.output(self.plus, 0)
 
-        
         self.pwm.ChangeDutyCycle(abs(speed))        
 
         if time:
             sleep(time)
             self.pwm.ChangeDutyCycle(0)
-    
 
     def stop(self):
         self.pwm.ChangeDutyCycle(0)
@@ -151,7 +150,6 @@ class Motor_PWM():
         self.pwmA.ChangeDutyCycle(0)
         self.pwmB.ChangeDutyCycle(0)
     
-
 
 if __name__ == "__main__":
     gp.setmode(gp.BOARD)

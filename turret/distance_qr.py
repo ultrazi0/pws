@@ -1,5 +1,3 @@
-import cv2 as cv
-from camera.qrcode import get_qrcode_cv
 from math_part import *
 
 

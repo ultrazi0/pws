@@ -5,6 +5,7 @@ from multiprocessing import Process, Event
 from multiprocessing.shared_memory import SharedMemory
 from os import getpid
 
+
 def initialize(frame_width: int =640, frame_height: int =480, camera: int =0):
     cap = cv2.VideoCapture(camera)
     cap.set(3, frame_width)

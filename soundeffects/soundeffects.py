@@ -2,7 +2,6 @@ import pygame
 from random import choice
 from time import sleep
 
-
 music_path = "sounds/starwars/imperial_march.wav"
 
 exit_sound_path = "sounds/starwars/have-the-protocol-droid's-mind-wiped.wav"
@@ -25,25 +24,25 @@ sound_paths_starwars = {
     'so uncivilized': "sounds/starwars/so-uncivilized-ew5.wav"
 }
 
-
 sound_paths_aim = {
-     'identify target': "sounds/starcraft/identify-target.wav",
-     'nuclear missle ready': "sounds/starcraft/nuclear-missle-ready.wav",
-     'not enough energy': "sounds/starcraft/not-enough-energy.wav"
+    'identify target': "sounds/starcraft/identify-target.wav",
+    'nuclear missle ready': "sounds/starcraft/nuclear-missle-ready.wav",
+    'not enough energy': "sounds/starcraft/not-enough-energy.wav"
 }
 
 sound_paths_shoot = {
-     'yes sir': "sounds/starcraft/yes-sir.wav",
-     'orders sir': "sounds/starcraft/orders-sir.wav",
-     'tank setting up': "sounds/starcraft/tank-setting-up.wav",
-     'justice': "sounds/starcraft/and-dispense-some-indiscriminate-justice.wav",
-     'tta-ta-ta-da': "sounds/starcraft/tta-ta-ta-da.wav"
+    'yes sir': "sounds/starcraft/yes-sir.wav",
+    'orders sir': "sounds/starcraft/orders-sir.wav",
+    'tank setting up': "sounds/starcraft/tank-setting-up.wav",
+    'justice': "sounds/starcraft/and-dispense-some-indiscriminate-justice.wav",
+    'tta-ta-ta-da': "sounds/starcraft/tta-ta-ta-da.wav"
 }
 
 
 def init_music(music_path=music_path):
     print(f'Music initialized at path "{music_path}"')
     pygame.mixer.music.load(music_path)
+
 
 def toggle_music(is_paused):
     if is_paused:
@@ -52,7 +51,7 @@ def toggle_music(is_paused):
     else:
         pygame.mixer.music.stop()
         is_paused = True
-    
+
     return is_paused
 
 
@@ -60,7 +59,7 @@ def init_one_sound(sound: str):
     assert type(sound) == str
 
     print(f'--> Sound at path "{sound}" initialized')
-    
+
     return pygame.mixer.Sound(sound)
 
 
@@ -70,15 +69,14 @@ def init_sounds(sounds: dict):
     _sounds = {}
 
     for key, value in sounds.items():
-                print(f'--> Sound named "{key}" initialized at path "{value}"')
-                sound = pygame.mixer.Sound(value)
-                _sounds[key] = sound
-    
+        print(f'--> Sound named "{key}" initialized at path "{value}"')
+        sound = pygame.mixer.Sound(value)
+        _sounds[key] = sound
+
     return _sounds
 
 
 def play_sound(sound, channel_id=None, wait=False):
-
     if channel_id is not None:
         pygame.mixer.Channel(channel_id).play(sound)
     else:
@@ -98,15 +96,15 @@ def play_random_sound_from_selection(sounds: dict, selection: list, channel_id=N
     assert type(selection) == list, "Parameter 'selection' must be a list"
 
     for sound in selection:
-          assert sound in sounds.keys(), f'Sound "{sound}" not in dictionary'
-    
+        assert sound in sounds.keys(), f'Sound "{sound}" not in dictionary'
+
     sound = choice(selection)
     play_sound(sounds[sound], channel_id, wait)
 
 
 def stop_sound_on_channel(channel_id=0):
     pygame.mixer.Channel(channel_id).stop()
-    
+
 
 if __name__ == "__main__":
     pygame.init()

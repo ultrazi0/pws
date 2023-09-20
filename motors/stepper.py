@@ -30,20 +30,20 @@ fullstepping_light = [
 
 
 class Stepper:
-    def __init__(self, in1, in2, in3, in4, initial_angle=0, initial_step=0, upper_border=None, lower_border=None,
-        gear_ratio=(63+277/405), number_of_teeth=32, config=None, config_file = None) -> None:
-        
+    def __init__(self, in1, in2, in3, in4, initial_angle=0., initial_step=0, upper_border=None, lower_border=None,
+                 gear_ratio=(63+277/405), number_of_teeth=32, config=None, config_file=None) -> None:
+
         if (upper_border is not None) and (initial_angle > upper_border) and not config:
             raise ValueError("Initial angle cannot be greater than the upper border")
         if (lower_border is not None) and (initial_angle < lower_border) and not config:
-            raise ValueError("Initian angle cannot be smaller than the lower border")
-        
+            raise ValueError("Initial angle cannot be smaller than the lower border")
+
         self.pins = [in1, in2, in3, in4]
         # Set up pins
         for pin in self.pins:
             GPIO.setup(pin, GPIO.OUT)
             GPIO.output(pin, 0)
-        
+
         self.initial_angle = initial_angle  # not used
         self.angle = initial_angle  # current angle
         self.upper_border = upper_border
@@ -56,11 +56,13 @@ class Stepper:
         self.config_file = config_file
         self.time_of_the_last_turn = -1
         self.turret_angle = float(config['values']['turret angle']) if (config is not None) else None
-    
+
     # Rotates stepper by a specified amount of steps
-    def rotate(self, steps, method=fullstepping_power, delay=0.001, turn_coefficient=1):
+    def rotate(self, steps, method=None, delay=0.001, turn_coefficient=1):
+        if method is None:
+            method = fullstepping_power
         steps = round(steps * turn_coefficient)
-        
+
         # Method choosing -- two available
         if method == halfstepping:
             d_angle = 360 / (self.gear_ratio * self.number_of_teeth * 2)
@@ -69,17 +71,17 @@ class Stepper:
         else:
             # If another method chosen
             raise RuntimeError('Specified method not supported')
-        
+
         # Start rotating
         if steps > 0:  # Choose the direction
             for step in range(steps):
 
                 new_angle = self.angle + d_angle  # angle after turning by 1 step
-                
+
                 # Cannon angle after turning by 1 step -- IF config is given
                 if self.turret_angle is not None:
-                    new_turret_angle = self.turret_angle + 1 / angle_turret(1/d_angle, config=self.config)
-                
+                    new_turret_angle = self.turret_angle + 1 / angle_turret(1 / d_angle, config=self.config)
+
                 # Take borders into account, only upper border because here it is turning right
                 if self.upper_border is not None:
                     # If stepper works as a turret, then check the turret angle  
@@ -91,16 +93,16 @@ class Stepper:
                         if new_angle > self.upper_border:
                             print("Cannot go any further right due to the borders")
                             return False  # Quit the function
-                
+
                 self.step += 1  # The next step
                 # Check if the full cycle has been completed --> start from the beginning
-                if self.step > len(method)-1:
+                if self.step > len(method) - 1:
                     self.step = 0
-                
+
                 # Set pins in the position (ON or OFF) according to the method
                 for pin in range(len(self.pins)):
                     GPIO.output(self.pins[pin], method[self.step][pin])
-                
+
                 # Update angles
                 if self.turret_angle is not None:
                     self.turret_angle = new_turret_angle
@@ -109,13 +111,13 @@ class Stepper:
                 sleep(delay)  # Wait until everything is placed in position
         else:  # Turning counter-clockwise
             for step in range(-steps):  # Steps is negative --> range should be positive
-                
+
                 new_angle = self.angle - d_angle  # Angle decreases
-                
+
                 # Cannon angle after turning by 1 step -- IF config is given
                 if self.turret_angle is not None:
-                    new_turret_angle = self.turret_angle - 1 / angle_turret(1/d_angle, config=self.config)
-                
+                    new_turret_angle = self.turret_angle - 1 / angle_turret(1 / d_angle, config=self.config)
+
                 # Take borders into account
                 if self.lower_border is not None:
                     if self.turret_angle is not None:
@@ -132,26 +134,26 @@ class Stepper:
                 # Check if the full cycle has been completed --> start from the beginning
                 if self.step < 0:
                     self.step = len(method) - 1
-                
+
                 # Set pins in the position (ON or OFF) according to the method
                 for pin in range(len(self.pins)):
                     GPIO.output(self.pins[pin], method[self.step][pin])
-                
+
                 # Update the angles
                 if self.turret_angle is not None:
                     self.turret_angle = new_turret_angle
                 self.angle = new_angle
 
                 sleep(delay)  # Wait until everything is placed in position
-        
+
         # Turn off all the pins so that there is no current, and hence the stepper can cool off
         for pin in range(len(self.pins)):
             GPIO.output(self.pins[pin], 0)
-            
+
         self.angle = set_angle_between_borders(self.angle)  # Set the angle between -180 and 180
-        if self.turret_angle is not None: # Set turret angle between -180 and 180
+        if self.turret_angle is not None:  # Set turret angle between -180 and 180
             self.turret_angle = set_angle_between_borders(self.turret_angle)
-        
+
         # Write down the values to config
         if self.config is not None:
             self.config['values']['angle stepper'] = str(self.angle)
@@ -173,18 +175,17 @@ class Stepper:
 
         # Rotate by that amount of steps
         self.rotate(round(amount_of_steps), method=method, delay=delay)
-    
+
     # Turn stepper by a specified angle
     def turn_by(self, angle, delay=0.002, method=fullstepping_light):
         # Calculate the needed amount of steps
         if method == halfstepping:
-            amount_of_steps = angle * (self.gear_ratio * self.number_of_teeth *2) / 360  # For halfstepping
+            amount_of_steps = angle * (self.gear_ratio * self.number_of_teeth * 2) / 360  # For halfstepping
         elif (method == fullstepping_power) or (method == fullstepping_light):
             amount_of_steps = angle * (self.gear_ratio * self.number_of_teeth) / 360  # For fullstepping
 
         # Rotate
         self.rotate(round(amount_of_steps), method=method, delay=delay)
-
 
 
 if __name__ == "__main__":
@@ -196,7 +197,8 @@ if __name__ == "__main__":
     init_angle = float(config['values']['angle stepper'])
     init_step = int(config['values']['step'])
 
-    stepper = Stepper(11, 13, 15, 16, initial_angle=init_angle, initial_step=init_step, config=config, config_file='cfg.ini')
+    stepper = Stepper(11, 13, 15, 16, initial_angle=init_angle, initial_step=init_step, config=config,
+                      config_file='cfg.ini')
 
     try:
         while 1:
@@ -221,5 +223,3 @@ if __name__ == "__main__":
         print('Goodbye!')
         sleep(1)
         GPIO.cleanup()
-
-    

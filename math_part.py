@@ -1,4 +1,3 @@
-import numpy as np
 import sympy as s
 from configparser import ConfigParser
 from math import *
@@ -22,7 +21,7 @@ def set_angle_between_borders(angle):
 
 def angle_turret(turret_angle, number_of_teeth_stepper=None, number_of_teeth_turret=None, config=None):
     """
-    Caclulates the stepper angle needed to turn the turret by turret_angle
+    Calculates the stepper angle needed to turn the turret by turret_angle
     
     ---Numbers of teeth can be either directly specified or read from the config file---
     """
@@ -82,11 +81,11 @@ def find_middle(coordinates, give_int=False):
 
     # If lines are parallel
     if (x3-x1==0) and (x4-x2==0) and (x1!=x2):
-        raise ValueError('Lines appear to be parralel (x=a)')
+        raise ValueError('Lines appear to be parallel (x=a)')
     elif (y3-y1==0) and (y4-y2==0) and (y1!=y2):
-        raise ValueError('Lines appear to be parralel (y=a)')
+        raise ValueError('Lines appear to be parallel (y=a)')
     
-    # If one of the lines is parralel with Oy-axis
+    # If one of the lines is parallel with Oy-axis
     elif (x3-x1==0) and (x4-x2!=0):
         x = x1
         y = y2 + (x1-x2)/(x4-x2)*(y4-y2)
@@ -94,7 +93,7 @@ def find_middle(coordinates, give_int=False):
         x = x2
         y = y1 + (x2-x1)/(x3-x1)*(y3-y1)
     
-    # If one of the lines is parralel with Ox-axis
+    # If one of the lines is parallel with Ox-axis
     elif (y3-y1==0) and (y4-y2!=0):
         y = y1
         x = x2 + (y1-y2)/(y4-y2)*(x4-x2)
@@ -210,11 +209,11 @@ def find_intersect_in_plane(line1, line2):
 
 def find_middle_points(coordinates, line):
     """
-    Returns two points that correpond with the middle points of the vertical sides of the QR-code
+    Returns two points that correspond with the middle points of the vertical sides of the QR-code
 
     :param coordinates: Coordinates of the corners of the image
     :param line: Line that goes through the middle and on which the points lie
-    :return: Two coordinates of two points in two-dimentional form
+    :return: Two coordinates of two points in two-dimensional form
     """
     A_2 = coordinates[0]  # point I_2
     B_2 = coordinates[1]  # point J_2
@@ -245,7 +244,7 @@ def find_middle_points(coordinates, line):
     return R_2, S_2
 
 
-# Disnance - three-dimensional space
+# Distance - three-dimensional space
 def get_vector(start, end):
     return end[0] - start[0], end[1] - start[1], end[2] - start[2]
 
@@ -332,6 +331,7 @@ def calculate_distance(a, b, focus, angle, length, angle_in_degrees=True):
     :param focus: focus length (y-coordinate of the points of the image)
     :param angle: turn angle of the real object
     :param length: length of the initial object
+    :param angle_in_degrees: whether the provided angle is given in degrees
     :return: distance from origin to middle of the object
     """
     if angle_in_degrees:
@@ -359,6 +359,7 @@ def angle_with_cosine_theorem(a, b, c):
 def c_with_cosine_theorem(a, b, angle):
     return sqrt(a**2+b**2-2*a*b*cos(angle))
 
+
 def translate_origin_to_cannon(d, M_coords, O_coords, focus_length=(3.04*10**(-3))) -> tuple:
     """
     Gives data needed to aim the cannon itself: both parts of the angle and the distance from the cannon
@@ -384,7 +385,7 @@ def translate_origin_to_cannon(d, M_coords, O_coords, focus_length=(3.04*10**(-3
     OM = d
     Q = (0, 0, 0)  # Coordinates of the cannon, better leave as (0, 0, 0)
 
-    # Refer to geogebra for clarity
+    # Refer to GeoGebra for clarity
     OM_accent = length_3d(O, m_accent)
     QM_accent = length_3d(Q, m_accent)
     OQ = length_3d(O, Q)
@@ -439,7 +440,7 @@ def translate_image_point(point_image, current_resolution=(640, 480), sensor_siz
     :param sensor_size: length and width of the sensor of the camera
     """
 
-    # Coordinates of the point (here point P) if the middel of the image were the origin \ IN PIXELS
+    # Coordinates of the point (here point P) if the middle of the image were the origin \ IN PIXELS
     x_P_px = current_resolution[0]//2 - point_image[0]
     y_P_px = -point_image[1] + current_resolution[1]//2
 
@@ -460,7 +461,7 @@ def calculate_3d_point(distance: float, angle_x: float, angle_y: float) -> tuple
     Returns the coordinates of a point in space
     :param distance: distance to the point
     :param angle_x: horizontal angle in respect to origin \\ IN RADIANS
-    :param angle_y: vertical angle in respoect to origin \\ IN RADIANS
+    :param angle_y: vertical angle in respect to origin \\ IN RADIANS
     :return: tuple of 3 elements -- coordinates
     """
     x = distance * sin(angle_x) * (1 - sin(angle_y)*tan(angle_y/2))
@@ -538,8 +539,6 @@ def translate_point_to_vertical_plane(point_2d, angle_x, angle_y, focus_length=3
     return x_accent, y_accent, z_accent
 
 
-
-
 # Angle with drag
 def find_angle_with_drag(x: float, y: float, m: float, v0: float,
                             k: float, g: float = 9.81, give_degrees: bool = True) -> float:
@@ -602,8 +601,6 @@ def find_angle_with_drag(x: float, y: float, m: float, v0: float,
     if x >= x02:
         print(' --> We use the second half')
         return alpha2
-
-
 
 
 if __name__ == '__main__':
